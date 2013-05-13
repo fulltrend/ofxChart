@@ -11,11 +11,11 @@ Copyright (c) 2013 Sergey Yershov, fulltrend@hotmail.com
 
 Usage
 ------------
-You can simply add all your axes containers via ofxChart class or instantiate them independently. ofxChart architecture allows you to add unlimited Axis Sets (containers) to your project. There are 3 types currently - single (for charts, like Pie, Dohnut), 2d (X,Y) and 3d (X,Y,Z). Each axis set can have unlimited number of corresponding Data Series. And each Data Series can have an unlimited number of corresponding data points. 
+You can simply add all your axes containers via ofxChart class or instantiate them independently. ofxChart architecture allows you to add unlimited Axis Sets (containers) to your project. There are 3 types currently - single (for charts, like Pie, Dohnut), 2d (X,Y) and 3d (X,Y,Z). Each axis set can have unlimited number of corresponding Data Series. And each Data Series can have an unlimited number of corresponding Data Points. 
 
 Current Features
 ------------
-- All instances are templates to maintain integrity of data sets for each set. The following data types are supported (int, short, float, double, Poco::DateTime)
+- All instances are using C++ templates to maintain integrity of data sets for each axis. The following data types are supported (int, short, float, double, Poco::DateTime)
 - Following Chart Types added: Pie Chart, 2d/3d line chart, point chart, area chart, 2d/3d area range, bar and column range, 2d stock charts
 - Chart Container allows scaling and offsetting inside local space
 - Static and dynamic axis positioning with customizable axis crossing. Axis label formatting and positioning
