@@ -37,3 +37,6 @@ Collaboration and Future Enhancement
 I am actively seeking collaborators with expertise in OpenGL and 3d graphics, geometry/statistics, OF, or any other useful skills to add to this project. I would like ofxChart to become one of the most useful add-ons for the most useful framework out there. 
 This is the initial release. Near future enhancements include adding event handling, displaying labels and generating legend. Further works will include more chart types and gages.
 
+Version
+------------
+- Version 1.0 (05/13/2013)
