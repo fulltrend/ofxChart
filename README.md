@@ -20,13 +20,13 @@ Current Features
 - Chart Container allows scaling and offsetting inside local space
 - Static and dynamic axis positioning with customizable axis crossing. Axis label formatting and positioning
 - Adjust data point colors, relative dimensions
-- Test on VS2010/VS2008, OS/X and IOS, Android. Earliest OF release supported: 0073 (can be supported on 0072 with ofxFBO)
+- Tested on VS2010/VS2008, OS/X and IOS, Android. Earliest OF release supported: 0073 (can be supported on 0072 with ofxFBO)
 
 
 
 Examples
 ------------
-copy the library  to your /addons folder. There are 3 examples
+Copy the library  to your /addons folder. There are 3 examples:
 - 2d Stock Chart. Allows you to switch between candlestick and bar chart. Also, shows how to use individual charts independent of ofxChart main class.
 - 2d Sine Wave mobile example. Double-tap to switch between line and area charts
 - 3d Example. 3d bar range chart and 3d pie chart. Use controls and mouse to rotate/scale/shift
