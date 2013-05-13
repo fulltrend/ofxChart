@@ -2,7 +2,7 @@ ofxChart
 ========
 Introduction
 ------------
-ofxChart is a custom add-on for OpenFrameworks C++ library. It allows adding various 2d and 3d charts to your projects. You can create individual charts independently or use ofxChart class as a manager. Current architecture allows adding as many Data Series to your axis sets as desired and performance on mobile devices is far superior to existing Core Plot due to optimizations with ofFBO and OpenGL, instead of relying on Quartz. 
+ofxChart is a custom add-on for OpenFrameworks C++ library. It allows adding various 2d and 3d charts to your projects. You can create individual charts independently or use ofxChart class as a manager. Current architecture allows adding as many Data Series to your axis sets as desired and performance on mobile devices is far superior to existing Core Plot due to optimizations with ofFBO and OpenGL rather than relying on Quartz. 
 
 Licence
 -------
