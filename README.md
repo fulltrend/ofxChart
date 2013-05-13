@@ -7,7 +7,7 @@ ofxChart is a custom add-on for OpenFrameworks C++ library. It allows adding var
 Licence
 -------
 The code in this repository is available under the [MIT License](https://secure.wikimedia.org/wikipedia/en/wiki/Mit_license).  
-Copyright (c) 2008-2012 Sergey Yershov, fulltrend@hotmail.com
+Copyright (c) 2013 Sergey Yershov, fulltrend@hotmail.com
 
 Usage
 ------------
