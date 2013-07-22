@@ -27,13 +27,19 @@ public:
     ofxChartSeriesBase()
 	{
         _BaseColor = ofColor(255,255,255);
-        _EnhancedVisuals = false;
+        _EnableLights = false;
         _PointContainerSize = 1.0;
+        lightsSetup();
+
 	}
 
     SERIESACCESSOR(PointContainerSize, float)
-    SERIESACCESSOR(EnhancedVisuals, bool)
+    SERIESACCESSOR(EnableLights, bool)
     SERIESACCESSOR(BaseColor, ofColor)
+    SERIESACCESSOR(LightFront, ofLight)
+    SERIESACCESSOR(LightBack, ofLight)
+    
+
 
     void setBaseColor(int r, int g, int b, int a = 255)
     {
@@ -52,6 +58,28 @@ public:
         if(axisContainer != NULL)
             axisContainer->invalidate();
     }
+    
+    virtual void lightsSetup();
+    virtual void lightsOn(){
+        if(this->getEnableLights())
+        {
+            material.begin();
+            ofEnableLighting();
+            
+        }
+        
+    }
+
+    virtual void lightsOff(){
+        if(this->getEnableLights())
+        {
+            // turn off lighting //
+            material.end();
+            ofDisableLighting();
+        }
+    }
+    
+    
     void setContainer(ofPtr<ofxChartContainerAxisSet> c){axisContainer =c;}
     ofPtr<ofxChartContainerAxisSet> getContainer(){return axisContainer;}
 
@@ -59,9 +87,17 @@ protected:
     ofPtr<ofxChartContainerAxisSet> axisContainer;
     ofxChartDataRange _range;
     ofColor _BaseColor;
-	bool _EnhancedVisuals; //TODO: adds light and material to charts
+	bool _EnableLights; //TODO: adds light and material to charts
     float _PointContainerSize;
     //bool isInvalid;
+    
+    
+    ofLight _LightFront, _LightBack;
+	ofMaterial material;
+    ofFloatColor lightColor, materialColor;
+    
+    
+    
     static double getShortestValueRange(vector<double> &dataArray, int size)
     {
         std::sort(dataArray.begin(), dataArray.end(), std::greater<double>());
