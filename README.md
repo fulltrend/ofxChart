@@ -39,4 +39,5 @@ This is the initial release. Near future enhancements include adding event handl
 
 Version
 ------------
+- Version 1.1 (07/22/2013). Added advanced lighting in 3d charts (point and pie) - examples to come. FBO setup fix for OF 0.74
 - Version 1.0 (05/13/2013)
