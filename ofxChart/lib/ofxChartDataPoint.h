@@ -33,7 +33,7 @@ class ofxChartDataPointSingle_ : public ofxChartDataPointBase
 {
 public:
     PT pt;
-    
+
     ~ ofxChartDataPointSingle_(){}
     ofxChartDataPointSingle_(){}
     ofxChartDataPointSingle_<PT>( PT pt);
@@ -78,7 +78,7 @@ template<class _X, class _Y>
 class ofxChartDataPointXY_: public ofxChartDataPointBase
 {
 public:
-    //	virtual ~ ofxChartDataPointXYZ(){}
+    //    virtual ~ ofxChartDataPointXYZ(){}
     _X x;
     _Y y;
 
@@ -97,12 +97,21 @@ public:
         //copyFrom( mom );
         return ofxChartDataPointXY_<float, float>(mom.x, mom.y);
     }
-    
+    void setPointSize(float _point_size)
+    {
+        pointSize = _point_size;
+        _ps_overwrite = true;
+    }
+    float getPointSize() {return pointSize;}
     ofxChartVec3d getDoubleValue()
     {
         return ofxChartVec3d( ofxChart::getDoubleValue(x),  ofxChart::getDoubleValue(y),0);
     }
 
+protected:
+    bool _ps_overwrite;
+private:
+    float pointSize;
 
 };
 
@@ -117,6 +126,7 @@ template<class _X, class _Y>
 ofxChartDataPointXY_< _X,  _Y>::ofxChartDataPointXY_( _X _x, _Y _y){
     x = _x;
     y= _y;
+    pointSize = 1;
     
 }
 template<class _X, class _Y>
@@ -124,6 +134,7 @@ ofxChartDataPointXY_< _X,  _Y>::ofxChartDataPointXY_( _X _x, _Y _y, ofColor c){
     x = _x;
     y= _y;
     color = c;
+    pointSize = 1;
 }
 
 
@@ -146,6 +157,7 @@ public:
     ofxChartDataPointXYZ_(){}
     ofxChartDataPointXYZ_<_X,_Y,_Z>( _X _x, _Y _y );
     ofxChartDataPointXYZ_<_X,_Y,_Z>( _X _x, _Y _y,_Z _z );
+    ofxChartDataPointXYZ_<_X,_Y,_Z>( _X _x, _Y _y,_Z _z, float _point_size );
     ofxChartDataPointXYZ_<_X,_Y,_Z>( _X _x, _Y _y,_Z _z, ofColor _color );
 
 //    template<class _srcX, class _srcY, class _srcZ>
@@ -170,22 +182,33 @@ public:
 
 template<class _X, class _Y, class _Z>
     ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y){
-    ofxChartDataPointXY_<_X, _Y>::x = _x;
-    ofxChartDataPointXY_<_X, _Y>::y= _y;
-    z = 0;
+        this->ofxChartDataPointXYZ_(_x, _y, 0);
+//        this->x = _x;
+//    this->y= _y;
+//    this->pointSize = 1;
+//    z = 0;
 }
     
 template<class _X, class _Y, class _Z>
-ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y,_Z _z){
-    ofxChartDataPointXY_<_X, _Y>::x = _x;
-    ofxChartDataPointXY_<_X, _Y>::y= _y;
-    z = _z;
+        ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y,_Z _z){
+            this->x = _x;
+            this->y= _y;
+            z = _z;
 }
+
+    template<class _X, class _Y, class _Z>
+    ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y,_Z _z, float _point_size){
+        this->x = _x;
+        this->y= _y;
+        z = _z;
+        this->setPointSize(_point_size);
+    }
 
 template<class _X, class _Y, class _Z>
 ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y,_Z _z, ofColor _color){
-    ofxChartDataPointXY_<_X, _Y>::x = _x;
-    ofxChartDataPointXY_<_X, _Y>::y= _y;
+    this->x = _x;
+    this->y= _y;
+    this->pointSize = 1;
     z = _z;
     ofxChartDataPointBase::color = _color;
 }
