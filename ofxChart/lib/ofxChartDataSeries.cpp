@@ -22,7 +22,7 @@ void ofxChartSeriesBase::rotateMatP2(ofVec3f p1, ofVec3f target)
     normal.normalize();
     
     ofVec3f forward(0, 1, 0);
-    ofVec3f axis	= forward.crossed(normal);
+    ofVec3f axis    = forward.crossed(normal);
     axis.normalize();
     float angle		= forward.angle(normal);
     glTranslatef(0, 0, 0);
@@ -30,7 +30,44 @@ void ofxChartSeriesBase::rotateMatP2(ofVec3f p1, ofVec3f target)
     
 }
 
+ void ofxChartSeriesBase::lightsSetup()
+{
+    //setup light and material
+    //pointLight.setDiffuseColor( ofColor(0.f, 255.f, 0.f));
+    
+    // specular color, the highlight/shininess color //
+    
+    
+    // shininess is a value between 0 - 128, 128 being the most shiny //
+    material.setShininess( 75 );
+    
+    lightColor.setBrightness( 100 );
+    lightColor.setSaturation( 150.f );
+    
+    lightColor.set(ofColor(127,127,127));
+    
+    //pointLight.setSpecularColor( ofColor(255.f, 255.f, 255.f));
+    _LightFront.setPosition(0, 0, 0);
+    _LightFront.setSpecularColor(lightColor);
+    _LightFront.setDiffuseColor(lightColor);
+    _LightFront.setAmbientColor(lightColor*2);
+    
+    _LightBack.setPosition(0, 0, 0);
+    _LightBack.setSpecularColor(lightColor);
+    _LightBack.setDiffuseColor(lightColor);
+    _LightBack.setAmbientColor(lightColor/2);
+    //_LightBack.setDirectional();
+    
+    
+    _LightFront.enable();
+    _LightBack.enable();
+    
+    
+    materialColor.setBrightness(255.f);
+    materialColor.setSaturation(255.f);
+    material.setSpecularColor(lightColor);
 
+}
 ////////            SINGLE        /////////////
 
 
@@ -141,11 +178,4 @@ void ofxChartSeriesXYZ<ChartDataPoint>::copyTo(ofPtr<ofxChartSeriesXYZ<ChartData
     mom->_BaseColor = ofxChartSeriesXY<ChartDataPoint>::_BaseColor;
  
 }
-
-
-
-
-
-
-
 
