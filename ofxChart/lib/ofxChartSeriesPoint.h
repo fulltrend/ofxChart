@@ -113,7 +113,11 @@ public:
         setPointModel(OFX_CHART_SERIES_POINT_TYPE_BOX3D);
         this->_BaseColor = ofColor(0,0,0,255);
     }
-     
+    
+    void addPoint(ofxChartDataPointXYZ_<X, Y, Z> dp)
+    {
+        this->addDataPoint(dp);
+    }
     void addPoint(X _x, Y _y, Z _z)
     {
         addPoint(_x, _y, _z, "", this->_BaseColor);
@@ -198,6 +202,8 @@ void ofxChartSeriesPoint3d<X,Y,Z>::draw()
     float pointSize = MIN(MIN(cps.x, cps.y), cps.z);
     ofRectangle containerRect = this->axisContainer->getDataRectangle();
 
+    this->lightsOn();
+    
     for(int i=0; i<dps; i++)
     {
         ofxChartVec3d fp = dp[i].getDoubleValue();
@@ -206,19 +212,37 @@ void ofxChartSeriesPoint3d<X,Y,Z>::draw()
 
         if(!containerRect.inside(cp))
             continue;
-                    
-        ofPushMatrix();
         
+        
+         
+        if(this->getEnableLights())
+        {
+            
+            
+            this->materialColor.set(dp[i].color);
+            //material.setAmbientColor(materialColor);
+            //material.setDiffuseColor(lightColor);
+            ofSetColor(this->materialColor);
+        }
+        else
+            ofSetColor(dp[i].color);
+        
+
+        
+        float psw = dp[i].getPointSize() * pointSize;
+        
+        ofPushMatrix();
         ofTranslate(cp);
         //smBox.draw();
         //ofScale(pointSize, pointSize, pointSize);
-         drawModel(pointSize);
-        //ofBox3d(0, 0, 0, pointSize);
+         drawModel(psw);
         ofPopMatrix();
     }
+   
+    this->lightsOff();
+    
     ofPopStyle();
     
-    
-    
-    
 }
+
+typedef ofxChartSeriesPoint3d<float, float, float> ofxChartSeriesPoint3dFloat;
