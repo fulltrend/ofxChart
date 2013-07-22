@@ -17,7 +17,7 @@ public:
     void draw();
     ofMesh mFace, mEdge, mBottom;
     float percent;
-    
+
     
     ofVec3f normalize(ofVec3f vector){
         float magnitude =  getMagnitude(vector);
@@ -50,24 +50,7 @@ public:
     
         _Radius = 30; _PixelHeight = 10;
          _AxialTilt =0;
-        
-        //setup light and material
-        //pointLight.setDiffuseColor( ofColor(0.f, 255.f, 0.f));
-        
-        // specular color, the highlight/shininess color //
-        
-        pointLight.setSpecularColor( ofColor(255.f, 255.f, 255.f));
-        pointLight.setPosition(0, 0, 0);
-        
-        // shininess is a value between 0 - 128, 128 being the most shiny //
-        material.setShininess( 55 );
-        
-        lightColor.setBrightness( 100 );
-        lightColor.setSaturation( 150.f );
-        
-        materialColor.setBrightness(250.f);
-        materialColor.setSaturation(200);
-
+  
     }
 
     SERIESACCESSOR(AxialTilt, float)
@@ -121,13 +104,7 @@ private:
         //return ofxChartSeriesBase::areaContainer->convertToLocalSpace(radius);
     }
     
-    
-    //GL
-    vector<ofxChartSeriesPieSlice> slices;
-    ofLight pointLight;
-	ofMaterial material;
-    ofFloatColor lightColor, materialColor;
-
+      vector<ofxChartSeriesPieSlice> slices;
     
 };
 
@@ -135,28 +112,22 @@ private:
 template<class ValueType>
 void ofxChartSeriesPie_<ValueType>::draw()
 {
+
+    
     ofPushMatrix();
     ofRotate(_AxialTilt, 1, 0, 0 );
     
     //calculate starting degree based on percentage and rotate accordingly
-    
+    this->lightsOn();
     float rotateDegree=0;
     //vector<ofxChartDataPointXY_<ValueType, DepthType> >dataPoints = this->getDataPoints();
     int numSlices = slices.size();
     for(int i=0; i< numSlices; i++)
     {
-        if(this->getEnhancedVisuals())
+        if(this->getEnableLights())
         {
-            //        material.begin();
-            //        ofEnableLighting();
-            //        pointLight.enable();
-            //        lightColor.setBrightness(255);
-            //        pointLight.setDiffuseColor(lightColor);
-            //        material.setSpecularColor(materialColor);
+            this->materialColor.set(this->getPointRef(i)->color);
         }
-        
-        //lightColor.set(dataPoints[i].color);
-        //ofSetColor(lightColor);
         
         
         //drawing transformations
@@ -179,12 +150,8 @@ void ofxChartSeriesPie_<ValueType>::draw()
         
         
         
-        // turn off lighting //
-        //        material.end();
-        //              ofDisableLighting();
         
         //setup text position at the beginning of each arc
-        //float yOffset = 0;
         const float fontSize = 8.0f;
         int fontLength = (int)this->getDataPoints()[i].title.length();
         
@@ -202,7 +169,9 @@ void ofxChartSeriesPie_<ValueType>::draw()
         
         ofPopMatrix();
     }
+    this->lightsOff();
     ofPopMatrix();
+    
 }
 
 template<class ValueType>
