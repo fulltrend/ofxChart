@@ -51,10 +51,12 @@ void ofxChartContainerAxisSet::autoScalePosition(ofVec3f containerMargin)
     ofxChartVec3d marginizedRange = ofxChartVec3d((maxContainerVector+ marginSize)- (minContainerVector-marginSize));
     
     ofxChartVec3d origRange = maxContainerVector - minContainerVector;
-    marginizedRange =  origRange/marginizedRange;
-    _DataScale = ofVec3f(marginizedRange.x, marginizedRange.y, marginizedRange.z);
+    ofxChartVec3d resRange =  origRange/marginizedRange;
+    _DataScale = ofVec3f(resRange.x, resRange.y, resRange.z);
     //recalculate offset
-    _DataOffset = ofVec3f(marginSize.x, marginSize.y, marginSize.z);
+    //TODO: convert 1/2 of the margin into percentage
+    ofxChartVec3d margins =  ( ofxChartVec3d(containerMargin)/marginizedRange)*100;
+    _DataOffset = ofVec3f(margins.x, margins.y, margins.z);
     invalidate();
     
 }
