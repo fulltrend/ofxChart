@@ -2,7 +2,7 @@
 
 
 #include "ofMain.h"
-#include "ofxChart\ofxChart.h"
+#include "ofxChart.h"
 #include "ofxChartSeriesBarRange.h"
 #include "ofxChartSeriesLine.h"
 

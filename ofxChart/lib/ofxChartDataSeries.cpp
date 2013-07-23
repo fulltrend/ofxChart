@@ -9,27 +9,6 @@
 ofxChartSeriesBase::~ofxChartSeriesBase()
 {}
 
-void ofxChartSeriesBase::rotateMatP2(ofVec3f p1, ofVec3f target)
-{
-    ofVec3f center(0, 0, 0);
-    //ofVec3f tar(target.x- p1.x, target.y - p1.y, target.z - p1.z);
-    
-    
-    glTranslatef(p1.x, p1.y, p1.z);
-    
-    
-    ofVec3f normal = target - p1;
-    normal.normalize();
-    
-    ofVec3f forward(0, 1, 0);
-    ofVec3f axis	= forward.crossed(normal);
-    axis.normalize();
-    float angle		= forward.angle(normal);
-    glTranslatef(0, 0, 0);
-    glRotatef( angle, axis.x, axis.y, axis.z );
-    
-}
-
 
 ////////            SINGLE        /////////////
 

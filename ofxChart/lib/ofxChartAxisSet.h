@@ -141,7 +141,6 @@ template<typename DataPointType>
 void ofxChartAxisSetSingle<DataPointType>::drawFBO()
 {
     //DRAW TO FBO:
-    ofPtr<ofxChartContainerAxisSet> c = this->getContainer();
   
     this->fbo.begin();
     ofPushStyle();

@@ -89,7 +89,7 @@ public:
        
         vector<ofxChartDataPointXYZ_<X, Y,Z> > dp = this->getDataPoints();
         int dps = dp.size();
-        ofRectangle containerRect = this->axisContainer->getDataRectangle();
+        ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
 
         //draw lines
         // if width more than 1 pixel, draw capsules
@@ -107,14 +107,14 @@ public:
                 ofxChartVec3d fp2 = dp[i].getDoubleValue();
                 ofVec3f cp2 = this->axisContainer->getContainerPoint(fp2,i);
                 
-                if(!ofRectangle(cp, cp2).intersects(containerRect))
+                if(!ofxChartRect3d(cp, cp2).intersects(containerRect))
                     continue;
                 
                 float distance = cp.distance(cp2);
                 float radius = lineWidth/2;
                 ofPushMatrix();
                 ofTranslate(((cp2-cp)/2) );
-                ofxChartSeriesBase::rotateMatP2(cp, cp2);
+                rotateMatP2(cp, cp2);
                 ofxChart::ofCapsule(0, 0,0, radius, distance);
                 ofPopMatrix();
             }

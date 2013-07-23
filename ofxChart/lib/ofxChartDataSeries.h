@@ -6,6 +6,8 @@
 #include "ofMain.h"
 #include "ofxChartDataPoint.h"
 #include "ofxChartContainer.h"
+#include "ofxChart3dUtils.h"
+
 #include <map>
 
 
@@ -27,13 +29,22 @@ public:
     ofxChartSeriesBase()
 	{
         _BaseColor = ofColor(255,255,255);
-        _EnhancedVisuals = false;
+        _EnableLights = false;
         _PointContainerSize = 1.0;
+        
+        //setting up material for lighting purposes
+        material.setShininess( 75 );
+        materialColor.setBrightness(200.f);
+        materialColor.setSaturation(200.f);
+        material.setSpecularColor(ofxChart::getDefaultLightColor());
+
+
 	}
 
     SERIESACCESSOR(PointContainerSize, float)
-    SERIESACCESSOR(EnhancedVisuals, bool)
+    SERIESACCESSOR(EnableLights, bool)
     SERIESACCESSOR(BaseColor, ofColor)
+  
 
     void setBaseColor(int r, int g, int b, int a = 255)
     {
@@ -41,7 +52,6 @@ public:
         invalidate();
     }
     
-    void rotateMatP2(ofVec3f p1, ofVec3f target);
 
     ofxChartDataRange getRange(){
         return _range;
@@ -52,6 +62,37 @@ public:
         if(axisContainer != NULL)
             axisContainer->invalidate();
     }
+
+    
+    virtual void lightsOn(){
+        if(this->getEnableLights())
+        {
+            material.begin();
+            ofEnableLighting();
+         
+//#ifdef TARGET_OPENGLES  //TODO: fix this
+//            LightFront.enable();
+//            LightBack.enable();
+//#endif
+            
+        }
+        
+    }
+
+    virtual void lightsOff(){
+        if(this->getEnableLights())
+        {
+            // turn off lighting //
+            material.end();
+            ofDisableLighting();
+//#ifdef TARGET_OPENGLES  //TODO: fix this
+//            LightFront.disable();
+//            LightBack.disable();
+//#endif
+        }
+    }
+    
+    
     void setContainer(ofPtr<ofxChartContainerAxisSet> c){axisContainer =c;}
     ofPtr<ofxChartContainerAxisSet> getContainer(){return axisContainer;}
 
@@ -59,9 +100,16 @@ protected:
     ofPtr<ofxChartContainerAxisSet> axisContainer;
     ofxChartDataRange _range;
     ofColor _BaseColor;
-	bool _EnhancedVisuals; //TODO: adds light and material to charts
+	bool _EnableLights; //TODO: adds light and material to charts
     float _PointContainerSize;
     //bool isInvalid;
+    
+    
+  	ofMaterial material;
+    ofFloatColor materialColor;
+    
+    
+    
     static double getShortestValueRange(vector<double> &dataArray, int size)
     {
         std::sort(dataArray.begin(), dataArray.end(), std::greater<double>());

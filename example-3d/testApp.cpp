@@ -35,15 +35,16 @@ void testApp::setup(){
 
     
      const ofxChartDataPointFloat3d lines[] = {
-        ofxChartDataPointFloat3d(0,0,0),
-        ofxChartDataPointFloat3d(1, 5, 0),
-        ofxChartDataPointFloat3d(3, 5, 1),
-        ofxChartDataPointFloat3d(4, 10, 3),
-        ofxChartDataPointFloat3d(6,0,2)
+        ofxChartDataPointFloat3d(0,0,0, .8),
+        ofxChartDataPointFloat3d(1, 5, 0, .8),
+        ofxChartDataPointFloat3d(3, 5, 1, .8),
+        ofxChartDataPointFloat3d(4, 10, 3, 1.5),
+        ofxChartDataPointFloat3d(6,0,2, 1.5)
     };
     
     line3d.addDataPoints(lines, sizeof lines/sizeof(ofxChartDataPointFloat3d));
-    line3d.setPointContainerSize(0.8);
+    line3d.getPointRef(4)->color = ofColor(255,0,0);
+    //    line3d.setPointContainerSize(0.8);
     line3d.setBaseColor(127,127,255);
 	line3d.setPointsColor(ofColor(255, 0, 0));
 	line3d.setPointModel(OFX_CHART_SERIES_POINT_TYPE_SPHERE);

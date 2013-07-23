@@ -50,7 +50,7 @@ void  ofxChartSeriesBarRange2d<_X,_Y>::draw()
     ofxChartVec3d cs = this->axisContainer->getDataPointSize();
     //float pointSize = 20;//TODO: MIN(MIN(cs.x, cs.y), cs.z);
     
-    ofRectangle containerRect = this->axisContainer->getDataRectangle();
+    ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
     int dps = dp.size();
     for(int i=0; i<dps; i++)
     {
@@ -63,12 +63,12 @@ void  ofxChartSeriesBarRange2d<_X,_Y>::draw()
         
         
         //OPTIMIZATION: DO NOT DRAW INVISIBLE RANGE
-        if(!ofRectangle(cp, cp2).intersects(containerRect))
+        if(!ofxChartRect3d(cp, cp2).intersects(containerRect))
             continue;
         
         float distance = cp.distance(cp2);
         ofPushMatrix();
-        ofxChartSeriesBase::rotateMatP2(cp, cp2);
+        rotateMatP2(cp, cp2);
         
         
         float calculatedPointSize;
@@ -163,7 +163,7 @@ void  ofxChartSeriesBarRange3d<_X,_Y,_Z>::draw()
     //TODO: check if custom color has been initialized
     
     ofxChartVec3d cs = this->axisContainer->getDataPointSize();
-    ofRectangle containerRect = this->axisContainer->getDataRectangle();
+    ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
     //float calculatedPointSize =MIN(MIN(cs.x, cs.y), cs.z) * this->_PointContainerSize;
     int dps = dp.size();
     for(int i=0; i<dps; i++)
@@ -177,7 +177,7 @@ void  ofxChartSeriesBarRange3d<_X,_Y,_Z>::draw()
         
         
         //OPTIMIZATION: DO NOT DRAW INVISIBLE RANGE
-        if(!ofRectangle(cp, cp2).intersects(containerRect))
+        if(!ofxChartRect3d(cp, cp2).intersects(containerRect))
             continue;
         
         float distance = cp.distance(cp2);
@@ -200,7 +200,7 @@ void  ofxChartSeriesBarRange3d<_X,_Y,_Z>::draw()
         {
             case OFX_CHART_COLUMN_3D_BOX:
             {
-                ofxChartSeriesBase::rotateMatP2(cp, cp2);
+                rotateMatP2(cp, cp2);
                 
                 ofMesh smBox;
                 ofxChartCreate3dRect(&smBox, ofVec3f(0,0,0), ofVec3f(calculatedPointSize,distance,calculatedPointSize), this->_BaseColor);
@@ -212,7 +212,7 @@ void  ofxChartSeriesBarRange3d<_X,_Y,_Z>::draw()
                 float radius = calculatedPointSize/2;
                 //                //ugly workaround - cylinder is drawn from the middle
                 ofTranslate(((cp2-cp)/2) );
-                ofxChartSeriesBase::rotateMatP2(cp, cp2);
+                rotateMatP2(cp, cp2);
                 ofxChart::ofCylinder(0, 0,0, radius, distance);
                 break;
             }
@@ -225,7 +225,7 @@ void  ofxChartSeriesBarRange3d<_X,_Y,_Z>::draw()
                 //                float rotationAngle = cp.angle(cp2);
                 //                float rotationAngleRad = cp.angleRad(cp2);
                 //                ofRotate(rotationAngle,rotationAxis.x, rotationAxis.y, rotationAxis.z);
-                ofxChartSeriesBase::rotateMatP2(cp, cp2);
+                rotateMatP2(cp, cp2);
                 
                 ofRect(0, 0,  calculatedPointSize, distance);
                 break;

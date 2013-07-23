@@ -29,7 +29,15 @@ enum ofxChartDateRange
 
 namespace ofxChart {
     
-
+static ofColor getDefaultLightColor()
+    {
+        ofFloatColor lightColor;
+        lightColor.set(127,127,127);
+        lightColor.setBrightness( 200 );
+        //lightColor.setSaturation( 150.f );
+        return lightColor;
+    }
+    
 static Poco::DateTime getDateTime(double log10Utc)
 {
     unsigned long long  utcld10ld = (log10Utc*100000000)+100000000000000000;

@@ -6,6 +6,7 @@
 
 #include "ofMain.h"
 #include "ofxChartVec3d.h"
+#include "ofxChartRect3d.h"
 
 typedef struct  {
     ofxChartVec3d min; ofxChartVec3d  max; int size;
@@ -98,9 +99,9 @@ public:
     
     void invalidate(){isInvalid = true;}
     //rectangle representing container for data elements. TODO: consider data margin offsets
-    ofRectangle getDataRectangle()
+     ofxChartRect3d getDataRectangle()
     {
-        return ofRectangle(ofVec3f(0,0,0), getDimensions());
+        return ofxChartRect3d(ofVec3f(0,0,0), getDimensions());
     }
     
     

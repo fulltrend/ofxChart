@@ -1,6 +1,6 @@
 /* Copyright (C) 2013 Sergey Yershov*/
 
-
+/*07/23/2013 ::  Added proper support fox IOS FBO vs GL to allow "clipping" within stencils*/
 
 #include "ofxChartAxisSet.h"
 
@@ -34,11 +34,18 @@ void ofxChartAxisSetBase::setup(ofEventArgs &data)
     ofFbo::Settings s;
     s.width = ofGetWidth();
     s.height = ofGetHeight();
-    s.useDepth = false;
+#ifndef TARGET_OPENGLES
+    s.useDepth = true;  //works in ver 0.74
     s.useStencil = true;
-    //s.depthStencilAsTexture = true;
+    s.depthStencilAsTexture = false;
+#else
+    s.useDepth = false; 
+    s.useStencil = true;
+    s.depthStencilAsTexture = true;
+#endif
     fbo.allocate(s);
     
+      
     
     //ofAddListener(ofEvents().draw, this, &ofxChartAxisSetBase::draw);
     
@@ -105,15 +112,25 @@ void ofxChartAxisSetBase::draw()
     if(!this->getContainer()->getVisible())
         return;
     
+    
     if(this->getContainer()->isInvalid)
     {
         update();
         drawFBO();
     }
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    ofPushStyle();
+    ofEnableAlphaBlending();
     fbo.draw(0,0);
-    glDisable(GL_BLEND);
+    ofPopStyle();
+
+    
+//   glEnable(GL_BLEND);
+//    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);//GL_ONE_MINUS_SRC_ALPHA);
+//    fbo.draw(0,0);
+//    glDisable(GL_BLEND);
+    
+    
+
     
     
 }
@@ -134,6 +151,7 @@ void ofxChartAxisSetBase::drawFBO()
     
     glClearColor(0, 0, 0, 0);
     glClear( GL_COLOR_BUFFER_BIT);
+    //glClear( GL_DEPTH_BUFFER_BIT);
     
     //DRAW WALLS
     ofxChartAxisSetBase::walls.back->draw();
@@ -147,6 +165,10 @@ void ofxChartAxisSetBase::drawFBO()
         axes[axi]->draw();
     
     //glEnable(GL_DEPTH_TEST);
+
+
+
+    
     
     glClear(GL_STENCIL_BUFFER_BIT);
     glEnable(GL_STENCIL_TEST);
@@ -162,21 +184,30 @@ void ofxChartAxisSetBase::drawFBO()
         m.draw();
     }
     
+
+    
+
+    
     glColorMask(1, 1, 1, 1);
     glStencilFunc(GL_EQUAL, 1, 1);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    
     
     ofPushMatrix();
     int seriesSize = _series.size();
     for(int i=0; i < seriesSize; i++)
     {
         ofxChartAxisSetBase::getDataSeries(i)->draw();
+        
     }
     ofPopMatrix();
-        
+
+
+
+  
     
     glDisable(GL_STENCIL_TEST);
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
     
     ofPopStyle();
 

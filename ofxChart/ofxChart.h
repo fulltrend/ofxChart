@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "ofxChart/lib/ofxChartSeriesPie.h"
-#include "ofxChart/lib/ofxChartAxisSet.h"
+#include "lib/ofxChartSeriesPie.h"
+#include "lib/ofxChartAxisSet.h"
 
 
 namespace ofxChart {

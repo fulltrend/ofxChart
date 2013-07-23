@@ -1,5 +1,6 @@
 /* Copyright (C) 2013 Sergey Yershov*/
 
+/*07/23/2013 ::  Fixed Z-Axis - added a proper matrix rotation*/
 
 #include "ofxChartAxis.h"
 
@@ -387,7 +388,11 @@ void ofxChartAxis::draw(){
             break;
         case OFX_CHART_AXIS_DIRECTION_Z:
             //TODO: rotate and draw rect
-            ofTranslate(0,0, crossPoint.z);
+            ofTranslate(crossPoint.x,0, 0);
+            ofPushMatrix();
+            rotateMatP2(ofVec3f().zero(), ofVec3f(0,0, -container->depth));
+            ofRect(0, 0, axisSize, container->depth);
+            ofPopMatrix();
             break;
     }
     
