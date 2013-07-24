@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxChartSeriesOCHL.h"
-#include "ofxChartAxisSet.h"
-#include "ofxChartSeriesBarRange.h"
+#include "lib/ofxChartSeriesOCHL.h"
+#include "lib/ofxChartAxisSet.h"
+#include "lib/ofxChartSeriesBarRange.h"
 
 using namespace Poco;
 /*
