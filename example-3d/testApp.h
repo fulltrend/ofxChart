@@ -3,8 +3,8 @@
 
 #include "ofMain.h"
 #include "ofxChart.h"
-#include "ofxChartSeriesBarRange.h"
-#include "ofxChartSeriesLine.h"
+#include "lib/ofxChartSeriesBarRange.h"
+#include "lib/ofxChartSeriesLine.h"
 
 
 
