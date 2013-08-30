@@ -29,7 +29,7 @@ class ofxChartSeriesLine2d: public ofxChartSeriesPoint2d<X, Y>
             this->_BaseColor = _PointsColor;
             ofxChartSeriesPoint2d<X, Y>::draw();
             this->_BaseColor = origColor;
-}
+        }
         //draw lines
         ofPath pLines;
         pLines.setFilled(false);
@@ -37,17 +37,103 @@ class ofxChartSeriesLine2d: public ofxChartSeriesPoint2d<X, Y>
         vector<ofxChartDataPointXY_<X, Y> > dp = this->getDataPoints();
         
         int dps =dp.size();
+        ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
+        //        bool newLine = true;
+        
         for(int i=0; i<dps; i++)
         {
             ofxChartVec3d fp = dp[i].getDoubleValue();
             ofVec3f cp = this->axisContainer->getContainerPoint(fp,i);
-            if(i == 0)
+            
+            if(i==0)
+            {
                 pLines.moveTo(cp);
-            else
-                pLines.lineTo(cp);
+                continue;
+            }
+            
+            ofxChartVec3d fpPrev = dp[i-1].getDoubleValue();
+            ofVec3f cpPrev = this->axisContainer->getContainerPoint(fpPrev,i-1);
+            
+//            ofRectangle cpRect = ofRectangle(cpPrev, cp);
+//            //JUST DOING SOME ESTIMATES ON WHAT TO DISPLAY - BETTER OF USING FBO THOUGH
+//            if(!containerRect.ofRectangle::inside(cpRect) )
+//            {
+//                
+//                if(cpRect.intersects(containerRect))
+//                {
+//                    ofPoint p;
+//                    if(containerRect.inside(cpPrev) && ! containerRect.inside(cp))
+//                    {
+//                        //current point outside - previous inside
+//                        if(ofLineSegmentIntersection(cpPrev, cp, containerRect.getTopLeft(),     containerRect.getTopRight(),    p)
+//                           || ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getBottomRight(),    p)
+//                           ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomRight(),     containerRect.getTopRight(),    p))
+//                        {
+//                            cp = p;
+//                        }
+//                        
+//                        
+//                    }
+//                    else if(containerRect.inside(cp) && ! containerRect.inside(cpPrev))
+//                    {
+//                        //current point inside, previous = outside
+//                        if(ofLineSegmentIntersection(cpPrev, cp, containerRect.getTopLeft(),     containerRect.getTopRight(),    p)
+//                           || ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getBottomRight(),    p)
+//                           ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getTopLeft(),    p))
+//                        {
+//                            pLines.moveTo(p);
+//                        }
+//                        
+//                    }
+//                    else
+//                    {
+//                        //both points outside
+//                        //if prev.y > current.y do top down, otherwise - reverse
+//                        if(cpPrev.y > cp.y)
+//                        {
+//                            if(ofLineSegmentIntersection(cpPrev, cp, containerRect.getTopLeft(),     containerRect.getTopRight(),    p)
+//                               ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getTopLeft(),    p))
+//                                pLines.moveTo(p);
+//                            
+//                            if( ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getBottomRight(),    p)
+//                               ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomRight(),     containerRect.getTopRight(),    p))
+//                            {
+//                                cp = p;
+//                            }
+//                            
+//                            
+//                        }
+//                        else{
+//                            if(ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getBottomRight(),    p)
+//                               ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getTopLeft(),    p))
+//                                pLines.moveTo(p);
+//                            
+//                            if(ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomLeft(),     containerRect.getBottomRight(),    p)
+//                               ||ofLineSegmentIntersection(cpPrev, cp, containerRect.getBottomRight(),     containerRect.getTopRight(),    p))
+//                            {
+//                                cp = p;
+//                            }
+//                            
+//                        }
+//                    }
+//                    
+//                }
+//                else
+//                {
+//                    pLines.moveTo(cp);
+//                    continue;
+//                }
+//            }
+//            
+            
+            
+            pLines.lineTo(cp);
         }
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_LINE_SMOOTH);
 
         pLines.draw();
+        glDisable(GL_LINE_SMOOTH);
     }
 
     //Accessors
