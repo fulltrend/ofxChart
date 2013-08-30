@@ -194,7 +194,6 @@ template<class _X, class _Y, class _Z>
             this->x = _x;
             this->y= _y;
             z = _z;
-            this->setPointSize(1);
 }
 
     template<class _X, class _Y, class _Z>
@@ -209,7 +208,7 @@ template<class _X, class _Y, class _Z>
 ofxChartDataPointXYZ_< _X,  _Y,  _Z>::ofxChartDataPointXYZ_( _X _x, _Y _y,_Z _z, ofColor _color){
     this->x = _x;
     this->y= _y;
-    this->setPointSize(1);
+    this->pointSize = 1;
     z = _z;
     ofxChartDataPointBase::color = _color;
 }
