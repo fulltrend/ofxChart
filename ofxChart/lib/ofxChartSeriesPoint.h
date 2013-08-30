@@ -137,6 +137,9 @@ public:
 
         
     }
+    
+     
+    
     void draw();
     void drawModel(float pointSize)
     {
@@ -163,9 +166,12 @@ public:
         
         }
     }
-    
+protected:
+    void addSphereToMesh(ofMesh &mesh, float radius, float stacks, float slices, ofColor &c, ofVec3f pos);
    private:
+                       
     ofMesh *customPointModel;
+    vector<ofMesh>cachedMesh;
     ofxchartSeries3dPointType pointType;
 };
 
@@ -198,9 +204,9 @@ void ofxChartSeriesPoint3d<X,Y,Z>::draw()
     vector<ofxChartDataPointXYZ_<X, Y,Z> > dp = this->getDataPoints();
     int dps = dp.size();
     
-    ofxChartVec3d cps = this->axisContainer->getDataPointSize() * this->_PointContainerSize;
-    float pointSize = MIN(MIN(cps.x, cps.y), cps.z);
-    ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
+ofxChartVec3d cps = this->axisContainer->getDataPointSize() * this->_PointContainerSize;
+float pointSize = MIN(MIN(cps.x, cps.y), cps.z);
+ofxChartRect3d containerRect = this->axisContainer->getDataRectangle();
 
     this->lightsOn();
     
@@ -227,15 +233,17 @@ void ofxChartSeriesPoint3d<X,Y,Z>::draw()
         else
             ofSetColor(dp[i].color);
         
-
         
         float psw = dp[i].getPointSize() * pointSize;
         
         ofPushMatrix();
         ofTranslate(cp);
-        //smBox.draw();
-        //ofScale(pointSize, pointSize, pointSize);
-         drawModel(psw);
+        drawModel(psw);
+        if(this->getShowTitles())
+        {
+            ofDrawBitmapString(dp[i].title, ofPoint(0,0));
+        
+        }
         ofPopMatrix();
     }
    
@@ -244,5 +252,8 @@ void ofxChartSeriesPoint3d<X,Y,Z>::draw()
     ofPopStyle();
     
 }
+
+
+
 
 typedef ofxChartSeriesPoint3d<float, float, float> ofxChartSeriesPoint3dFloat;
