@@ -70,10 +70,12 @@
         }
         
         
+        
+        //----------------------------------------------------------
         bool intersects(const ofxChartRect3d& rect) const {
             return (getMinX() <= rect.getMaxX() && getMaxX() >= rect.getMinX() &&
                     getMinY() <= rect.getMaxY() && getMaxY() >= rect.getMinY() &&
-            getMinZ() >= -rect.getMaxZ() && getMaxZ() <= -rect.getMinZ()) ;
+                    getMinZ() >= -rect.getMaxZ() && getMaxZ() <= -rect.getMinZ()) ;
         }
         
         
@@ -84,7 +86,30 @@
         //        void growToInclude(const ofRectangle& rect);
         //        void growToInclude(const ofPoint& p0, const ofPoint& p1);
         //
-        //        ofRectangle getIntersection(const ofRectangle& rect) const;
+                ofxChartRect3d getIntersection(const ofxChartRect3d& rect) const
+        {
+            
+                float x0 = MAX(getMinX(),rect.getMinX());
+                float x1 = MIN(getMaxX(),rect.getMaxX());
+                
+                float w = x1 - x0;
+                if(w < 0.0f) return ofxChartRect3d(0,0,0,0,0,0); // short circuit if needed
+                
+                float y0 = MAX(getMinY(),rect.getMinY());
+                float y1 = MIN(getMaxY(),rect.getMaxY());
+                
+                float h = y1 - y0;
+                if(h < 0.0f) return ofxChartRect3d(0,0,0,0,0,0);  // short circuit if needed
+            
+            float z0 = MAX(getMinZ(),rect.getMinZ());
+            float z1 = MIN(getMaxZ(),rect.getMaxZ());
+            
+            float d = z1 - z0;
+            if(h < 0.0f) return ofxChartRect3d(0,0,0,0,0,0);  // short circuit if needed
+         
+            return ofxChartRect3d(x0,y0,z0,w,h,d);
+            
+        }
         //
         //        ofRectangle getUnion(const ofRectangle& rect) const;
         
