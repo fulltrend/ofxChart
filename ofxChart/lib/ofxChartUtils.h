@@ -6,6 +6,11 @@
 
 #include "ofMain.h"
 #include "Poco/DateTimeFormatter.h"
+#include "ofBitmapFont.h"
+
+#ifdef TARGET_OPENGLES
+#include "ofxChartGLUtils.h"
+#endif
 
 #ifdef TARGET_WIN32
 	#define POCO_NO_UNWINDOWS
@@ -28,7 +33,121 @@ enum ofxChartDateRange
 
 
 namespace ofxChart {
-    
+    static void drawBillboardString(string textString, float x, float y, float z){
+#ifndef TARGET_OPENGLES
+        ofDrawBitmapString(textString, x, y, y);
+        return;
+#else
+        GLint blend_src, blend_dst;
+        glGetIntegerv( GL_BLEND_SRC, &blend_src );
+        glGetIntegerv( GL_BLEND_DST, &blend_dst );
+        
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        
+        int len = (int)textString.length();
+        //float yOffset = 0;
+        float fontSize = 8.0f;
+        bool bOrigin = false;
+        
+        float sx = 0;
+        float sy = -fontSize;
+        
+        
+        ///////////////////////////
+        // APPLY TRANSFORM / VIEW
+        ///////////////////////////
+        //
+        
+        bool hasModelView = false;
+        bool hasProjection = false;
+        bool hasViewport = false;
+        
+        ofRectangle rViewport;
+
+    	//gluProject method
+        GLfloat  modelview[16], projection[16];
+        GLint view[4];
+        float dScreenX, dScreenY, dScreenZ;
+        glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+        glGetFloatv(GL_PROJECTION_MATRIX, projection);
+        
+        
+        
+        glGetIntegerv(GL_VIEWPORT, view);
+        view[0] = 0; view[1] = 0; //we're already drawing within viewport
+        gluProject(x, y, z, modelview, projection, view, &dScreenX, &dScreenY, &dScreenZ);
+        
+        if (dScreenZ >= 1)
+            return;
+        
+        rViewport = ofGetCurrentViewport();
+        
+        hasProjection = true;
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        
+        hasModelView = true;
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        
+        glTranslatef(-1, -1, 0);
+        glScalef(2/rViewport.width, 2/rViewport.height, 1);
+        
+        glTranslatef(dScreenX, dScreenY, dScreenZ);
+        
+//        if(currentFbo == NULL) {
+            glScalef(1, -1, 1);
+//        } else {
+//            glScalef(1,  1, 1); // invert when rendering inside an fbo
+//        }
+
+        
+        // (c) enable texture once before we start drawing each char (no point turning it on and off constantly)
+        //We do this because its way faster
+       ofDrawBitmapCharacterStart(textString.size());
+        
+        for(int c = 0; c < len; c++){
+            if(textString[c] == '\n'){
+                
+                sy += bOrigin ? -1 : 1 * (fontSize*1.7);
+                sx = 0;
+                
+                //glRasterPos2f(x,y + (int)yOffset);
+            } else if (textString[c] >= 32){
+                // < 32 = control characters - don't draw
+                // solves a bug with control characters
+                // getting drawn when they ought to not be
+                ofDrawBitmapCharacter(textString[c], (int)sx, (int)sy);
+                
+                sx += fontSize;
+            }
+        }
+        //We do this because its way faster
+        ofDrawBitmapCharacterEnd();
+        
+        
+        if (hasModelView)
+            glPopMatrix();
+        
+        if (hasProjection)
+        {
+            glMatrixMode(GL_PROJECTION);
+            glPopMatrix();
+            glMatrixMode(GL_MODELVIEW);
+        }
+        
+        if (hasViewport)
+            ofPopView();
+        
+        glBlendFunc(blend_src, blend_dst);
+        
+#endif
+
+    }
 static ofColor getDefaultLightColor()
     {
         ofFloatColor lightColor;
@@ -37,6 +156,49 @@ static ofColor getDefaultLightColor()
         //lightColor.setSaturation( 150.f );
         return lightColor;
     }
+    
+    
+    /// COLOR MANIPULATION
+    
+    static  float hue2rgb(float p, float q, float t)
+    {
+        float tt = t;
+        if (tt < 0.0) tt += 1.0;
+        if (tt > 1.0) tt -= 1.0;
+        if (tt < 1.0/6.0) return p + (q - p) * 6.0 * tt;
+        if (tt < 1.0/2.0) return q;
+        if (tt < 2.0/3.0) return p + (q - p) * (2.0/3.0 - tt) * 6.0;
+        return p;
+    }
+    
+    static ofColor hslToRgb(float h, float s, float l)
+    {
+        float r, g, b;
+        if(s == 0.0)
+        {
+            r = g = b = l; // achromatic
+        }
+        else
+        {
+            float q;
+            if (l < 0.5)
+                q = l * (1.0 + s);
+            else
+                q = l + s - l * s;
+            
+            //float q = (l < 0.5) ? (l * (1.0 + s)) : (l + s - l * s);
+            
+            float p = 2.0 * l - q;
+            r = hue2rgb(p, q, h + 1.0/3.0);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1.0/3.0);
+        }
+        return ofColor(r*255, g*255, b*255);
+    }
+    
+    
+    
+  /// DATETIME CONVERSIONS
     
 static Poco::DateTime getDateTime(double log10Utc)
 {
