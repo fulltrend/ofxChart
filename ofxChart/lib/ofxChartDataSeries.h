@@ -33,10 +33,10 @@ public:
         _PointContainerSize = 1.0;
         
         //setting up material for lighting purposes
-        material.setShininess( 75 );
+        TextureMaterial.setShininess( 25 );
         materialColor.setBrightness(200.f);
         materialColor.setSaturation(200.f);
-        material.setSpecularColor(ofxChart::getDefaultLightColor());
+        TextureMaterial.setSpecularColor(ofxChart::getDefaultLightColor());
 
 
 	}
@@ -44,6 +44,7 @@ public:
     SERIESACCESSOR(PointContainerSize, float)
     SERIESACCESSOR(EnableLights, bool)
     SERIESACCESSOR(BaseColor, ofColor)
+    SERIESACCESSOR(ShowTitles, bool)
   
 
     void setBaseColor(int r, int g, int b, int a = 255)
@@ -67,7 +68,7 @@ public:
     virtual void lightsOn(){
         if(this->getEnableLights())
         {
-            material.begin();
+            TextureMaterial.begin();
             ofEnableLighting();
          
 //#ifdef TARGET_OPENGLES  //TODO: fix this
@@ -83,7 +84,7 @@ public:
         if(this->getEnableLights())
         {
             // turn off lighting //
-            material.end();
+            TextureMaterial.end();
             ofDisableLighting();
 //#ifdef TARGET_OPENGLES  //TODO: fix this
 //            LightFront.disable();
@@ -95,18 +96,25 @@ public:
     
     void setContainer(ofPtr<ofxChartContainerAxisSet> c){axisContainer =c;}
     ofPtr<ofxChartContainerAxisSet> getContainer(){return axisContainer;}
-
+    
+    virtual void update()
+    {
+    }
+    
+    
+    ofMaterial TextureMaterial;
+    
 protected:
     ofPtr<ofxChartContainerAxisSet> axisContainer;
     ofxChartDataRange _range;
     ofColor _BaseColor;
 	bool _EnableLights; //TODO: adds light and material to charts
     float _PointContainerSize;
+    bool _ShowTitles;
     //bool isInvalid;
     
     
-  	ofMaterial material;
-    ofFloatColor materialColor;
+  	ofFloatColor materialColor;
     
     
     
@@ -257,6 +265,7 @@ class ofxChartSeriesXY:  public ofxChartSeriesSingleAxis<ChartDataPoint> //might
     ofxChartSeriesXY(){}
     ofxChartVec3d getShortestValueRange();
     virtual void sortX();
+    virtual void sortY();
  
 
     
@@ -355,6 +364,25 @@ class ofxChartSeriesXY:  public ofxChartSeriesSingleAxis<ChartDataPoint> //might
     
     }
     
+    
+    /******  FUNCTION USED TO CREATE MATHEMATICAL FUNCTIONS OF X**********/
+    template< class _X, class _Y, typename _F>
+    void createFunctionX(_X xMin, _X xMax, int numOfRows, _F f)
+    {
+        this->_pointsGen.clear();
+        
+        for (int i = 0; i < numOfRows; i++)
+        {
+            _X x = ofMap(i, 0, numOfRows, xMin, xMax);
+            _Y y = f(x);
+            if(y!=y )
+                continue;
+
+            this->addDataPoint(ChartDataPoint(x, y));
+        }
+        this->invalidate();
+    }
+    
 protected:
     
     virtual void calculateRange()
@@ -404,6 +432,11 @@ ofxChartVec3d ofxChartSeriesXY<ChartDataPoint>::getShortestValueRange()
     return ofxChartVec3d(sX, sY, 0);
 }
 
+
+
+
+
+
 template <typename  ChartDataPoint>
 struct sortXCompare
 {
@@ -422,6 +455,22 @@ void ofxChartSeriesXY<ChartDataPoint>::sortX()
 }
 
 
+template <typename  ChartDataPoint>
+struct sortYCompare
+{
+    inline bool operator() (const ChartDataPoint& struct1, const ChartDataPoint& struct2)
+    {
+        return (ofxChart::getDoubleValue( struct1.y) < ofxChart::getDoubleValue( struct2.y));
+    }
+};
+
+template <typename  ChartDataPoint>
+void ofxChartSeriesXY<ChartDataPoint>::sortY()
+{
+    
+    std::sort(this->_pointsGen.begin(), this->_pointsGen.end(), sortYCompare<ChartDataPoint>());
+    
+}
 
 
 
@@ -471,7 +520,8 @@ public :
         calculateRange();
         
     }
-        ofxChartVec3d getShortestValueRange()
+    
+    ofxChartVec3d getShortestValueRange()
     {
         ofxChartVec3d resVec = ofxChartSeriesXY<ChartDataPoint>::getShortestValueRange();
         double sZ;
@@ -484,6 +534,40 @@ public :
         resVec.z = sZ;
         return resVec;
     }
+    
+    /* FUNCTION GRAPHER HELPER*/
+    template< class _X, class _Y, class _Z, typename _F>
+    void createFunctionXY(_X xMin, _Y yMin, _X xMax, _Y yMax, int numOfRows, int numOfColumns, _F f)
+    {
+        this->_pointsGen.clear();
+        
+        for (int i = 0; i < numOfRows; i++)
+        {
+            _X x = ofMap(i, 0, numOfRows, xMin, xMax);
+            for (int j = 0; j < numOfColumns; j++)
+            {
+                _Y y = ofMap(j, 0, numOfColumns, yMin, yMax);
+                _Z z = f(x,y);
+                this->addDataPoint(ChartDataPoint(x, y,z));
+            }
+        }
+        //SETUP DEFAULT COLOR TABLE
+        
+        vector<ofxChartDataPointXYZ_<_X, _Y,_Z> > dp = this->getDataPoints();
+        int dps = dp.size();
+        float zRange = this->_range.max.z - this->_range.min.z, zMax = this->_range.max.z;
+        
+        for(int i=0; i<dps; i++)
+        {
+            
+            float zCur = 0.6 * (zMax - dp[i].z) / zRange;
+            this->getPointRef(i)->color = ofxChart::hslToRgb(zCur, 1, 0.5);
+        }
+
+        this->invalidate();
+    }
+
+    
     
     BaseSeriesPointer clone();
     void copyTo(ofPtr<ofxChartSeriesXYZ<ChartDataPoint> > &mom);
