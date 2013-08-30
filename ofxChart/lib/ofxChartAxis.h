@@ -30,7 +30,8 @@ enum ofxChartAxisLineStyle
 {
     OFX_CHART_AXIS_LINE_SOLID,
     OFX_CHART_AXIS_LINE_DASHED,
-    OFX_CHART_AXIS_LINE_DOTTED
+    OFX_CHART_AXIS_LINE_DOTTED,
+    OFX_CHART_AXIS_LINE_NONE
 };
 
 class ofxChartAxisBase
@@ -43,18 +44,18 @@ public:
 	}
   
 
-    void setContainerPosition(float val, ofxChartTextPosition textAlign)
+    void setContainerPosition(ofVec3f val, ofxChartTextPosition textAlign)
     {
         crossing = OFX_CHART_AXIS_CROSS_CONTAINER;
-        crossingValue = val;
+        crossingVector = val;
         textPosition = textAlign;
         container->invalidate();
         
     }
-    void setValuePosition(double val)
+    void setValuePosition(ofVec3f val)
     {
         crossing = OFX_CHART_AXIS_CROSS_VALUE;
-        crossingValue = val;
+        crossingVector = val;
         container->invalidate();
 
     }
@@ -110,7 +111,7 @@ ofColor axisColor, labelColor;
 ofxChartAxisCrossing crossing;
 ofxChartAxisDirection direction;
 ofxChartTextPosition textPosition;
-double crossingValue;
+ofVec3f crossingVector;
 bool showMajLabel, showMinor, showMajor, visible;
     ofxChart::baseLabelFormatter *labelFormatter;
     ofxChartAxisDataType axisDataType;

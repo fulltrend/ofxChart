@@ -12,7 +12,7 @@ ofxChartAxisBase::ofxChartAxisBase( ofxChartAxisDirection _d, ofPtr<ofxChartCont
     numMajTicks = 5, numMinorTicks = 5;
     majWidthPixels=8.0, minWidthPixels=4.0, maxOffsetPixels=0.0, minOffsetPixels=0.0, axisSize=2;
     crossing = OFX_CHART_AXIS_CROSS_CONTAINER;
-    crossingValue = 0;
+    crossingVector = ofVec3f().zero();
     axisDataType = OFX_CHART_AXIS_DATATYPE_DECIMAL;
     lineStyle = OFX_CHART_AXIS_LINE_SOLID;
     isLog=false;
@@ -372,23 +372,23 @@ void ofxChartAxis::draw(){
     
     ofFill();
     ofSetColor(axisColor);
-    ofxChartVec3d crossPoint = (crossing == OFX_CHART_AXIS_CROSS_VALUE
-                                ? container->getContainerPoint(ofxChartVec3d(crossingValue,crossingValue,crossingValue),0, true)
-                                : ofxChartVec3d(crossingValue, crossingValue, crossingValue));
-    
+    ofVec3f crossPoint = (crossing == OFX_CHART_AXIS_CROSS_VALUE
+                                ? container->getContainerPoint(ofxChartVec3d(crossingVector),0, true)
+                                : crossingVector);
+    ofTranslate(crossPoint);
     switch(direction)
     {
         case OFX_CHART_AXIS_DIRECTION_X:
-            ofTranslate(0, crossPoint.y);
+//            ofTranslate(0, crossPoint.y);
             ofRect(0, 0,  container->width,axisSize);
             break;
         case OFX_CHART_AXIS_DIRECTION_Y:
-            ofTranslate(crossPoint.x, 0);
+//            ofTranslate(crossPoint.x, 0);
             ofRect(0, 0, axisSize, container->height);
             break;
         case OFX_CHART_AXIS_DIRECTION_Z:
             //TODO: rotate and draw rect
-            ofTranslate(crossPoint.x,0, 0);
+//            ofTranslate(crossPoint.x,0, 0);
             ofPushMatrix();
             rotateMatP2(ofVec3f().zero(), ofVec3f(0,0, -container->depth));
             ofRect(0, 0, axisSize, container->depth);
@@ -459,8 +459,7 @@ void ofxChartAxis::draw(){
         ofScale(1, -1); //after all we're drawing everything in axis space (i.e., upside down)
         
         ofSetColor(labelColor);
-        ofDrawBitmapString(valStr, 0,0);
-        
+        ofxChart::drawBillboardString(valStr, 0, 0, 0);
         
         
         
