@@ -13,8 +13,7 @@
 
 #define OFX_CHART_DEFAULT_AXIS_WIDTH    400
 #define OFX_CHART_DEFAULT_AXIS_HEIGHT    300
-
-
+#define OFX_CHART_DEFAULT_DEPTH_FUNC   GL_LEQUAL
 
 ////////                AXIS SET        ///////////////
 
@@ -25,7 +24,7 @@ class ofxChartAxisSetBase
 public:
      struct
     {
-        ofxChartAxisWall *left, *back, *bottom, *right, *top;
+        ofxChartAxisWall *left, *back, *bottom, *right, *top, *front;
         
     } walls;
     
@@ -47,6 +46,7 @@ public:
     
     virtual void draw();
     virtual void drawFBO();
+    virtual void drawNonFBO();
     
     void setStaticRange(ofxChartVec3d min, ofxChartVec3d max);
     void setDynamicRange()
@@ -86,7 +86,23 @@ public:
         
     }
     
-    
+        SERIESACCESSOR(UseCamera, bool)
+    //SERIESACCESSOR(UseFbo, bool)
+    bool getUseFbo()
+    {
+        return _UseFbo;
+    }
+    bool setUseFbo(const bool &newVal)
+    {
+        _UseFbo = newVal;
+        ofVec3f cameraScale = this->CameraView.getScale();
+        this->CameraView.setScale(1,(_UseFbo ? -1 : 1),1);
+
+        this->invalidate();
+    }
+    //*********     CAMERA AND INTRACTION
+    ofEasyCam CameraView;
+       
     void addDataSeries(ofxChartSeriesBase *   series){
       
         
@@ -109,6 +125,9 @@ public:
 
     
     vector<ofxChartAxisBase* > axes;
+    
+    
+    
 
 protected:
     ofPtr<ofxChartContainerAxisSet> _container;
@@ -116,7 +135,8 @@ protected:
     ofFbo fbo;
     void setup(ofEventArgs &data);
     virtual void init();
-    bool _isDynamicRange;
+    bool _isDynamicRange, _UseCamera, _UseFbo;
+   
 
 };
 
@@ -146,7 +166,9 @@ void ofxChartAxisSetSingle<DataPointType>::drawFBO()
     ofPushStyle();
     //ofLoadMatrix(ofMatrix4x4(modl));
     ofMultMatrix(this->getContainer()->getModelMatrix());
+    glScalef(1, -1, 1);
     
+    glDisable(GL_DEPTH_TEST);
     glClearColor(0, 0, 0, 0);
     glClear( GL_COLOR_BUFFER_BIT);
     ofPushMatrix();
@@ -235,7 +257,7 @@ public:
         walls.bottom->update(axes);
         walls.top->update(axes);
         walls.right->update(axes);
-
+walls.front->update(axes);
         
         //ofxChartAxisSetBase::getContainer()->isInvalid = false;
     }
@@ -290,9 +312,16 @@ class ofxChartAxisSetXYZ: public ofxChartAxisSetXY<DataPointType>
         c->depth = (c->height+ c->width)/2;
         
         //UPDATE WALLS. SHOW BACK, BOTTOM, LEFT by default
+        float t_coef = 0.01;
         this->walls.left->setVisible(true);
+        this->walls.left->setThickness(c->width *t_coef);
         this->walls.bottom->setVisible(true);
-        this->walls.back->setThickness(10);
+        this->walls.bottom->setThickness(c->height *t_coef);
+        this->walls.back->setThickness(c->depth*t_coef);
+        this->walls.right->setThickness(c->depth*t_coef);
+        this->walls.front->setThickness(c->depth*t_coef);
+
+        this->setUseCamera(true);
     }
 
 //XY SHOULD BE ALLOWED AS WELL
@@ -308,7 +337,78 @@ class ofxChartAxisSetXYZ: public ofxChartAxisSetXY<DataPointType>
    
     ofxChartAxis* getZAxis(){return _primeZAxis;}
   
-      
+    
+    ofVec3f getScreenCoordinates( ofVec3f pointCoord)
+    {
+        ofVec3f ScreenXYZ;
+        if(this->getUseCamera())
+        {
+            ofRectangle viewport = ofGetCurrentViewport();
+            //so, may need to multiple by current model matrix
+            ofVec3f CameraXYZ = pointCoord * this->_container->getModelMatrix() * this->CameraView.getModelViewMatrix() * this->CameraView.getProjectionMatrix(viewport);
+            
+            ScreenXYZ.x = (CameraXYZ.x + 1.0f) / 2.0f * viewport.width + viewport.x;
+            ScreenXYZ.y = (1.0f - CameraXYZ.y) / 2.0f * viewport.height + viewport.y;
+            
+            ScreenXYZ.z = CameraXYZ.z;
+            
+        }
+        return ScreenXYZ;
+    }
+    
+    DataPointType* getScreenClosestDataPoint(float screenX, float screenY, float *resDist   )
+    {
+        //find closest data point
+        //get the surrounding rectangle
+        //convert the result rectangle to screen rectangle
+        //check if screen point is inside screen rect
+        ofVec3f pointContainerSize = this->getContainer()->getDataPointSize().toVec3f();
+
+        
+        
+        int seriesSize = this->getSeries().size();
+        
+        DataPointType* closestPoint = NULL;
+        ofVec3f closestPointCoord;
+        ofRectangle closestRect;
+        float shortestDistance = 0;
+        for(int i=0; i < seriesSize; i++)
+        {
+            ofxChartSeriesXYZ<DataPointType> *series =  (ofxChartSeriesXYZ<DataPointType> *) this->getDataSeries(i);
+            
+            int dpSize = series->getDataPoints().size();
+            for(int j=0; j< dpSize; j++)
+            {
+                ofxChartVec3d fp =  series->getPointRef(j)->getDoubleValue();
+                
+                ofVec3f cp = this->getContainer()->getContainerPoint(fp,j);
+                
+                ofVec3f cpd = this->getScreenCoordinates( cp );
+                float dist = cpd.distance(ofVec2f(screenX, screenY));
+                if(j == 0 || dist < shortestDistance) {
+                    shortestDistance = dist;
+                    closestPoint = series->getPointRef(j);
+                    closestPointCoord = cpd;
+                    
+                    ofVec3f cpdEnd = this->getScreenCoordinates( cp+pointContainerSize );
+                    closestRect = ofRectangle(cpd, cpdEnd);
+                }
+            
+            }
+        }
+//        ofVec3f pointContainerDimensions =  this->getScreenCoordinates(  );
+//        ofxChartRect3d containerRect = ofxChartRect3d(pointContainer.x, pointContainer.y, pointContainer.z
+//                                                      , pointContainerDimensions.x, pointContainerDimensions.y, pointContainerDimensions.z);
+
+            *resDist = shortestDistance;
+          //  insidePointRect =closestRect.inside(screenX, screenY);
+
+            return closestPoint;
+        
+    }
+
+    
+    
 protected:
     ofxChartAxis* _primeZAxis;
 

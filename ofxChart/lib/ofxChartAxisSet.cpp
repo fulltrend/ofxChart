@@ -7,17 +7,27 @@
 void ofxChartAxisSetBase::init()
 {
     _container = ofPtr<ofxChartContainerAxisSet>(new ofxChartContainerAxisSet());
-    
+    CameraView.setDistance(0);
+    _UseCamera = false;_UseFbo = false;
     ofColor defaultColor = ofColor(255,255,255);
     walls.left = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_LEFT,_container);
     walls.left->setColor(defaultColor/2);
+    
     walls.back = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_BACK,_container);
     walls.back ->setColor(defaultColor);
+   
     walls.right = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_RIGHT,_container);
+    walls.right->setColor(defaultColor);
+    
     walls.bottom = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_BOTTOM,_container);
     walls.bottom->setColor(defaultColor/3);
+    
     walls.top = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_TOP,_container);
     walls.top->setColor(defaultColor);
+    
+    walls.front = new ofxChartAxisWall(OFX_CHART_AXIS_WALL_FRONT,_container);
+    walls.front->setColor(defaultColor);
+    
     
     ofAddListener(ofEvents().setup, this, &ofxChartAxisSetBase::setup);
     _isDynamicRange = true;
@@ -39,13 +49,11 @@ void ofxChartAxisSetBase::setup(ofEventArgs &data)
     s.useStencil = true;
     s.depthStencilAsTexture = false;
 #else
-    s.useDepth = false; 
+    s.useDepth = false;
     s.useStencil = true;
-    s.depthStencilAsTexture = true;
+    s.depthStencilAsTexture = false;
 #endif
     fbo.allocate(s);
-    
-      
     
     //ofAddListener(ofEvents().draw, this, &ofxChartAxisSetBase::draw);
     
@@ -95,7 +103,7 @@ void ofxChartAxisSetBase::update()
                 svRange = c->getMin(svRange, ofxChartAxisSetBase::getDataSeries(i)->getShortestValueRange()) ;
             }
             
-            //    ofxChartAxisSetBase::getDataSeries(i)->update(c);
+                this->getDataSeries(i)->update();
             
         }
         //CALCULATE DATA POINT SIZE. TODO: calculate indexed size
@@ -112,28 +120,127 @@ void ofxChartAxisSetBase::draw()
     if(!this->getContainer()->getVisible())
         return;
     
-    
+    //ofPushStyle();
+    ofEnableAlphaBlending();
     if(this->getContainer()->isInvalid)
     {
         update();
-        drawFBO();
+        if(_UseFbo)
+        {
+            
+            drawFBO();
     }
-    ofPushStyle();
-    ofEnableAlphaBlending();
-    fbo.draw(0,0);
-    ofPopStyle();
-
-    
-//   glEnable(GL_BLEND);
-//    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);//GL_ONE_MINUS_SRC_ALPHA);
-//    fbo.draw(0,0);
-//    glDisable(GL_BLEND);
+    }
     
     
 
+
+        if(_UseFbo)
+        {
+            ofSetColor(255, 255, 255,255); //useful if accidently left out user-color
+            glDisable(GL_DEPTH_TEST);
+            fbo.draw(0,0);
+        }
+        else
+            drawNonFBO();
+        
+    ofDisableAlphaBlending();
+        //ofPopStyle();
     
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);//GL_ONE_MINUS_SRC_ALPHA);
+//        glDisable(GL_BLEND);
+
     
 }
+void ofxChartAxisSetBase::drawNonFBO()
+{
+    
+//    GLfloat modl[16];
+//    glGetFloatv( GL_MODELVIEW_MATRIX, modl);
+    
+    ofPushMatrix();
+    if(this->getUseCamera())
+    {
+        
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(OFX_CHART_DEFAULT_DEPTH_FUNC);
+
+        this->CameraView.begin();
+    }
+    
+     ofMultMatrix(this->getContainer()->getModelMatrix());
+if(!this->getUseCamera())
+{
+    glScalef(1, -1, 1);
+}
+    
+    //  ofLoadMatrix(ofMatrix4x4(modl));
+    ofPushStyle();
+    
+    
+    //DRAW WALLS
+    ofxChartAxisSetBase::walls.back->draw();
+    ofxChartAxisSetBase::walls.left->draw();
+    ofxChartAxisSetBase::walls.bottom->draw();
+    ofxChartAxisSetBase::walls.top->draw();
+    ofxChartAxisSetBase::walls.right->draw();
+   ofxChartAxisSetBase::walls.front->draw();
+    
+     glDepthMask(GL_TRUE);
+    //DRAW AXES
+    for(int axi=0; axi< axes.size(); axi++)
+        axes[axi]->draw();
+
+    
+    
+    
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    
+    glEnable(GL_STENCIL_TEST); //Enable using the stencil buffer
+    glColorMask(0, 0, 0, 0); //Disable drawing colors to the screen
+    glDisable(GL_DEPTH_TEST); //Disable depth testing
+    glStencilFunc(GL_ALWAYS, 1, 1); //Make the stencil test always pass
+    //Make pixels in the stencil buffer be set to 1 when the stencil test passes
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    
+    ofMesh m;
+    ofxChartCreate3dRect(&m, ofVec3f().zero(), this->getContainer()->getDimensions(), ofColor(255,255,255));
+    m.draw();
+
+    glColorMask(1, 1, 1, 1); //Enable drawing colors to the screen
+    //Make the stencil test pass only when the pixel is 1 in the stencil buffer
+    glStencilFunc(GL_EQUAL, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Make the stencil buffer not change
+    
+    
+    
+    //DRAW SERIES
+    int seriesSize = _series.size();
+    for(int i=0; i < seriesSize; i++)
+    {
+        ofxChartAxisSetBase::getDataSeries(i)->draw();
+        
+    }
+    
+    
+    glDisable(GL_STENCIL_TEST);
+
+
+    
+    if(this->getUseCamera())
+    {
+               
+        this->CameraView.end();
+        glDisable(GL_DEPTH_TEST);
+    }
+    ofPopMatrix();
+
+    
+}
+
+
 
 void ofxChartAxisSetBase::drawFBO()
 {
@@ -145,28 +252,37 @@ void ofxChartAxisSetBase::drawFBO()
     this->fbo.begin();
     
     ofPushStyle();
+    
     ofLoadMatrix(ofMatrix4x4(modl));
-    ofMultMatrix(ofxChartAxisSetBase::getContainer()->getModelMatrix());
-    
-    
+    if(this->getUseCamera())
+    {
+        glClear( GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
+
+        this->CameraView.begin(ofRectangle(0, ofGetHeight()-fbo.getHeight(),  fbo.getWidth(), fbo.getHeight()) );
+            //glScalef(1, -1, 1);
+      }
+
+    ofMultMatrix(this->getContainer()->getModelMatrix());
+
     glClearColor(0, 0, 0, 0);
     glClear( GL_COLOR_BUFFER_BIT);
-    //glClear( GL_DEPTH_BUFFER_BIT);
-    
+     
+     
+      
     //DRAW WALLS
     ofxChartAxisSetBase::walls.back->draw();
     ofxChartAxisSetBase::walls.left->draw();
     ofxChartAxisSetBase::walls.bottom->draw();
     ofxChartAxisSetBase::walls.top->draw();
     ofxChartAxisSetBase::walls.right->draw();
-    
+    ofxChartAxisSetBase::walls.front->draw();
+
+    glDepthMask(GL_TRUE);
     //DRAW AXES
     for(int axi=0; axi< axes.size(); axi++)
         axes[axi]->draw();
-    
-    //glEnable(GL_DEPTH_TEST);
-
-
 
     
     
@@ -197,7 +313,7 @@ void ofxChartAxisSetBase::drawFBO()
     int seriesSize = _series.size();
     for(int i=0; i < seriesSize; i++)
     {
-        ofxChartAxisSetBase::getDataSeries(i)->draw();
+        this->getDataSeries(i)->draw();
         
     }
     ofPopMatrix();
@@ -207,11 +323,17 @@ void ofxChartAxisSetBase::drawFBO()
   
     
     glDisable(GL_STENCIL_TEST);
-    //glDisable(GL_DEPTH_TEST);
     
     ofPopStyle();
 
-    
+    if(this->getUseCamera())
+    {
+        this->CameraView.end();
+        glDisable(GL_DEPTH_TEST);
+    }
+
     this->fbo.end();
     
 }
+
+
