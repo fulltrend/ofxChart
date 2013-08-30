@@ -16,7 +16,8 @@ enum ofxChartAxisWallPos
     OFX_CHART_AXIS_WALL_LEFT,
     OFX_CHART_AXIS_WALL_BOTTOM,
     OFX_CHART_AXIS_WALL_TOP,
-    OFX_CHART_AXIS_WALL_BACK
+    OFX_CHART_AXIS_WALL_BACK,
+    OFX_CHART_AXIS_WALL_FRONT
 };
 
 
@@ -26,7 +27,7 @@ public:
     ofxChartAxisWall( ofxChartAxisWallPos _p, ofPtr<ofxChartContainerAxisSet> _c){
 		position = _p; container = _c; color=ofColor(200,255,255, 255);
         visible = false; enableSeeThrough=false;
-        thickness = 10.0;
+        thickness = 4; //should be x% of the dimensions
     }
     
     void setEnableSeeThrough(bool ess, float seeThroughAmount = 100.0){enableSeeThrough = ess;

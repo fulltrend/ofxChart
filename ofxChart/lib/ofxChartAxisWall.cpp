@@ -8,13 +8,17 @@ void ofxChartAxisWall::draw(){
     {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        glDepthMask(GL_TRUE);
     }
     else
+    {
         glDisable(GL_CULL_FACE);
-    
+        glDepthMask(GL_FALSE);
+}
     m.draw();
     
     glDisable(GL_CULL_FACE);
+
 }
 
 
@@ -44,7 +48,7 @@ void ofxChartAxisWall::update( vector<ofxChartAxisBase* > axes)
             
             for(int a=0; a< axs; a++)
             {
-                axes[a]->updateWall(ofVec3f(0,0,0), ofVec3f(0,h,-z));
+                axes[a]->updateWall(ofVec3f(1,0,0), ofVec3f(1,h,-z));
             }
 
             break;
@@ -55,21 +59,44 @@ void ofxChartAxisWall::update( vector<ofxChartAxisBase* > axes)
 
             for(int a=0; a< axs; a++)
             {
-                axes[a]->updateWall(ofVec3f(0,0,vz), ofVec3f(w,h,vz));
+                axes[a]->updateWall(ofVec3f(0,0,vz+1), ofVec3f(w,h,vz+1));
 
             }
             break;
+ 
+        case OFX_CHART_AXIS_WALL_FRONT:
+            vz=thickness;
+            w=cw;h=ch;z=-thickness;
+            //draw lines. todo: switch on line types, check if drawing of lines enabled on the aix
+            
+            for(int a=0; a< axs; a++)
+            {
+                axes[a]->updateWall(ofVec3f(0,0,vz+1), ofVec3f(w,h,vz+1));
+                
+            }
+            break;
+            
         case OFX_CHART_AXIS_WALL_BOTTOM:
             h=-thickness;
             z=cz;
             w = cw;
             for(int a=0; a< axs; a++)
             {
-                axes[a]->updateWall(ofVec3f(0,0,0), ofVec3f(w,0,-z));
+                axes[a]->updateWall(ofVec3f(0,1,0), ofVec3f(w,1,-z));
 
             }
             break;
         case OFX_CHART_AXIS_WALL_RIGHT:
+            vx = cw;
+            w = thickness;
+            h = ch;
+            z=cz;
+            
+            for(int a=0; a< axs; a++)
+            {
+                axes[a]->updateWall(ofVec3f(cw,0,0), ofVec3f(cw,h,-z));
+            }
+
             
             break;
         case    OFX_CHART_AXIS_WALL_TOP:
@@ -79,7 +106,7 @@ void ofxChartAxisWall::update( vector<ofxChartAxisBase* > axes)
             w = cw;
             for(int a=0; a< axs; a++)
             {
-                axes[a]->updateWall(ofVec3f(0,ch,0), ofVec3f(cw,ch,-z));
+                axes[a]->updateWall(ofVec3f(0,ch-1,0), ofVec3f(cw,ch-1,-z));
                 
             }
             break;
