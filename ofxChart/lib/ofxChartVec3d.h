@@ -31,6 +31,10 @@ struct  ofxChartVec3d{
         return v1.distance(v2);
     }
     
+    ofVec3f toVec3f()
+    {
+        return ofVec3f(x,y,z);
+    }
     
     ofxChartVec3d getCenter(const ofxChartVec3d& v2)
     {
