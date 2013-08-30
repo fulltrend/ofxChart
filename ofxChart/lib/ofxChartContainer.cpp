@@ -37,26 +37,32 @@ static ofxChartVec3d normalizePointVector(ofxChartVec3d v)
 
 
 
-
+/*CONTAINER MARGIN: NUM OF WORLD CONTAINER PIXELS*/
 void ofxChartContainerAxisSet::autoScalePosition(ofVec3f containerMargin)
 {
     
     //recalculate scale
     _DataScale = ofVec3f().one();
     _DataOffset =ofVec3f().zero();
-    ofxChartVec3d marginSize = ofxChartVec3d(containerMargin);
-    ofxChartVec3d minContainerVector = getContainerValue(ofVec3f(0,0,0))
-    , maxContainerVector = getContainerValue(getDimensions());
+
+    ofxChartVec3d minContainerVector = this->dataRange.min //getContainerValue(ofVec3f(0,0,0))
+    , maxContainerVector = this->dataRange.max; // getContainerValue(getDimensions());
     
-    ofxChartVec3d marginizedRange = ofxChartVec3d((maxContainerVector+ marginSize)- (minContainerVector-marginSize));
+    ofVec3f containerMarginPercentage = (containerMargin/getDimensions())*100;
+    ofVec3f containerMarginProportion = (100-containerMarginPercentage)/100;
     
+
+ //   ofxChartVec3d marginSize = getContainerValue(containerMargin);
     ofxChartVec3d origRange = maxContainerVector - minContainerVector;
-    ofxChartVec3d resRange =  origRange/marginizedRange;
-    _DataScale = ofVec3f(resRange.x, resRange.y, resRange.z);
+    
+//    ofxChartVec3d marginizedRange = ofxChartVec3d((maxContainerVector+ marginSize)- (minContainerVector-marginSize));
+    ofxChartVec3d marginizedRange = origRange*containerMarginProportion;
+    
+    ofxChartVec3d resRange =  marginizedRange/origRange;
+    _DataScale = containerMarginProportion;//ofVec3f(resRange.x, resRange.y, resRange.z);
     //recalculate offset
-    //TODO: convert 1/2 of the margin into percentage
-    ofxChartVec3d margins =  ( ofxChartVec3d(containerMargin)/marginizedRange)*100;
-    _DataOffset = ofVec3f(margins.x, margins.y, margins.z);
+//    ofxChartVec3d margins =  ( ofxChartVec3d(containerMargin)/marginizedRange)*100;
+    _DataOffset = containerMarginPercentage/2;
     invalidate();
     
 }
